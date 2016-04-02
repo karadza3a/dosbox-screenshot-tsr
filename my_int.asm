@@ -4,18 +4,23 @@ _install_tsr:
 		mov     byte [FuncID], 0       ;Initialize FuncID to zero.
 		mov     cx, 0FFh
 	.SearchLoop:
-		cmp cl, 0e0h
+		cmp cl, 080h		; try all IDs 80h..FFh
 		je .NotInstalled
 
-		mov     ah, cl
-		push    cx
-		mov     al, 0
-		int     2Fh
-		pop     cx
-		cmp     al, 0
-		je      .TryNext
+		push cx
+		push ds
 
-		mov word [_strcmp.str1], di
+		mov ah, cl
+		mov al, 0
+		int 2Fh
+		
+		pop ds
+		pop cx
+		
+		cmp al, 0
+		je .TryNext
+
+		mov word [_strcmp.str1], di		; ID matches?
 		mov word [_strcmp.str2], uid
 		call _strcmp
 		cmp al, 0
@@ -24,9 +29,9 @@ _install_tsr:
 		loop    .SearchLoop
 		jmp     .NotInstalled
 
-	.TryNext:        
-		mov     [FuncID], cl      ;Save possible function ID if this
-		loop    .SearchLoop      ; identifier is not in use.
+	.TryNext:
+		mov     [FuncID], cl	; Save possible function ID if this
+		loop    .SearchLoop		;  identifier is not in use.
 		jmp     .NotInstalled
 
 	.AlreadyThere:
@@ -42,11 +47,11 @@ _install_tsr:
 	ret
 	    
 	.GoodID:
-		mov word [_print.string], text_starting
+		mov word [_print.string], text_meddling
 		call _print
 		;install tsr
 		call _novi_2F
-		mov dx, 0FFFh	;Cuvamo FF paragrafa
+		mov dx, 0FFFh	;Cuvamo FFF paragrafa
 		mov ah, 31h		;TSR funkcija ima kod 31h
 		int 21h			;DOS sistemski poziv
     
@@ -60,26 +65,18 @@ _install_tsr:
 ; handler for the code we've been developing:
 
 _myint_2F:
-push ax
-	
-		mov al, ah
-		call _print_char
-		mov al, [ds:FuncID]
-		call _print_char
 
-		mov al, cr
-		call _print_char
-		mov al, lf
-		call _print_char
-		
-pop ax
+	push ax
+	mov ax, cs
+	mov ds, ax	
+	pop ax
 
-	cmp     ah, [ds:FuncID]   ;Is this call for us?
+	cmp     ah, [FuncID]   ;Is this call for us?
 	je      .ItsUs
 
 	; jump to old int
-	push word [ds:old_int2F_seg]
-	push word [ds:old_int2F_off]
+	push word [old_int2F_seg]
+	push word [old_int2F_off]
 	retf
 
 	; Now decode the function value in AL:

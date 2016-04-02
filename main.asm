@@ -110,8 +110,9 @@ segment .data
 text_usage db "Usage:", cr, lf, "  SS.COM -start filename", cr, lf, "  SS.COM -stop", cr, lf, 0
 text_stop db "-stop", 0
 text_start db "-start", 0
-text_stopping db "Removing screenshot TSR", cr, lf, 0
-text_starting db "Installing screenshot TSR", cr, lf, 0
+text_stopping db "Removing screenshot TSR...", cr, lf, 0
+text_starting db "Installing screenshot TSR...", cr, lf, 0
+text_meddling db "Meddling with interupt table...", cr, lf, 0
 text_new_line db cr, lf, 0
 text_tsr_exists db "A copy of this TSR already exists in memory",cr,lf, " Aborting installation process.",cr,lf,0
 text_tsr_haos db "There are too many TSRs already installed.",cr,lf, "Sorry, aborting installation process.",cr,lf,0
