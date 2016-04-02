@@ -49,8 +49,13 @@ _install_tsr:
 	.GoodID:
 		mov word [_print.string], text_meddling
 		call _print
-		;install tsr
+
+		; install int handlers
 		call _novi_2F
+		call _novi_09
+		call _novi_1C
+
+		; terminate and stay resident
 		mov dx, 0FFFh	;Cuvamo FFF paragrafa
 		mov ah, 31h		;TSR funkcija ima kod 31h
 		int 21h			;DOS sistemski poziv
@@ -65,19 +70,18 @@ _install_tsr:
 ; handler for the code we've been developing:
 
 _myint_2F:
+		push bx
+		mov bx, cs
+		mov ds, bx
+		pop bx
 
-	push ax
-	mov ax, cs
-	mov ds, ax	
-	pop ax
+		cmp     ah, [FuncID]   ;Is this call for us?
+		je      .ItsUs
 
-	cmp     ah, [FuncID]   ;Is this call for us?
-	je      .ItsUs
-
-	; jump to old int
-	push word [old_int2F_seg]
-	push word [old_int2F_off]
-	retf
+		; jump to old int
+		push word [old_int2F_seg]
+		push word [old_int2F_off]
+		retf
 
 	; Now decode the function value in AL:
 
@@ -101,27 +105,77 @@ _myint_2F:
 
 _myint_1C:
 		pusha
+		mov bx, cs
+		mov ds, bx
 
-		push gs     ; obnovi vrednost ds koju smo sacuvali pri instaliranju hendlera
-		pop  ds
-	; ; Obrada tajmerskog prekida 
-	; 	dec word [brojac]
-	; 	jnz izlaz
-	; ; Jeste nula, tj. sad ispisujemo...
-	; 	inc  byte [var]
-	; 	mov ax, [vrednost]
-	; 	mov [brojac], ax
-	;     mov si, var
-	; 	call _print
+		cmp byte [cs:should_print], 1
+		jne .izlaz
 
-	izlaz:
+		mov byte [should_print], 0
+		mov bx, 0B800h			;pripremamo se za citanje iz video memorije
+		mov es, bx
+
+		mov cx, 2000
+		mov bx, 460
+		mov di, screen_cap
+	.copy:
+		mov al, [di]
+		inc al
+		mov [es:bx], al
+		inc di
+		add bx, 2
+		loop .copy
+
+		jmp .izlaz
+
+	.izlaz:
 		popa  	
 	iret
+
+_myint_09:
+		pusha
+		mov bx, cs
+		mov ds, bx
+
+	; Obrada tastaturnog prekida 
+		in al, KBD				;citamo scan code
+		cmp al, F1_SCAN				;ako je pritisnuto F1
+		je .f1						;ispisi 1
+		jmp .izlaz					;u suprotnom, idi na kraj
+	.f1:
+		mov byte [cs:should_print], 1
+		mov bx, 0B800h			;pripremamo se za citanje iz video memorije
+		mov es, bx
+
+		mov cx, 2000
+		mov bx, 460
+		mov di, screen_cap
+	.copy:
+		mov al, [es:bx]
+		mov [di], al
+		inc di
+		add bx, 2
+		loop .copy
+
+		jmp .izlaz
+
+	.izlaz:
+		popa
+		
+		push word [cs:old_int09_seg]
+		push word [cs:old_int09_off]
+	retf
+		;retf (return far) ce da skoci na stari handler za 09h
+		;nema potrebe da mi radimo iret, posto ce to stari hendler da ucini za nas
+	;iret
 
 segment .data
 
 FuncID db 0
 uid db "screenshot.karadza3a.com", cr, lf, 0
+should_print db 0
+screen_cap times 2000 db 0
+db 0
 
 %include "prekidi.asm"
 

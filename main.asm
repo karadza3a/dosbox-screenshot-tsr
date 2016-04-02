@@ -1,7 +1,11 @@
 org 100h
 
-cr equ 0ah
-lf equ 0dh
+cr equ 0Ah
+lf equ 0Dh
+
+KBD equ 60h
+F1_SCAN equ 3Bh
+; F1_SCAN equ 01h
 
 segment .code
 
