@@ -3,6 +3,8 @@ org 100h
 cr equ 0ah
 lf equ 0dh
 
+segment .code
+
 main:   
 	cld
 	mov	cx, 0080h	; Maksimalni broj izvrsavanja instrukcije sa prefiksom REPx
@@ -102,6 +104,8 @@ main:
 	call _install_tsr
 
 ret
+
+segment .data
 
 text_usage db "Usage:", cr, lf, "  SS.COM -start filename", cr, lf, "  SS.COM -stop", cr, lf, 0
 text_stop db "-stop", 0

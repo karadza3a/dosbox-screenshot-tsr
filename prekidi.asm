@@ -11,7 +11,7 @@ _novi_2F:
 	mov [old_int2F_seg], bx
 
 ; Modifikacija u tabeli vektora prekida tako da pokazuje na nasu rutinu
-	mov dx, _int_2F
+	mov dx, _myint_2F
 	mov [es:2Fh*4], dx
 	mov ax, cs
 	mov [es:2Fh*4+2], ax
@@ -45,7 +45,7 @@ _novi_1C:
 	mov [old_int1C_seg], bx
 
 ; Modifikacija u tabeli vektora prekida tako da pokazuje na nasu rutinu
-	mov dx, _int_1C
+	mov dx, _myint_1C
 	mov [es:1Ch*4], dx
 	mov ax, cs
 	mov [es:1Ch*4+2], ax
