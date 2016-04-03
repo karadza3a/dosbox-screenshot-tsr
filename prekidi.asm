@@ -21,14 +21,20 @@ _novi_09:
 
 ; Vratiti stari vektor prekida 0x09
 _stari_09:
-	cli
-	xor ax, ax
-	mov es, ax
-	mov ax, [old_int09_seg]
-	mov [es:09h*4+2], ax
-	mov dx, [old_int09_off]
-	mov [es:09h*4], dx
-	sti
+		pusha
+		cli
+		xor ax, ax
+		mov es, ax
+
+		mov ax, [es:09h*4+2]
+		mov ds, ax 
+
+		mov ax, [old_int09_seg]
+		mov [es:09h*4+2], ax
+		mov dx, [old_int09_off]
+		mov [es:09h*4], dx
+		sti
+		popa
 	ret
 
 
@@ -53,14 +59,20 @@ _novi_2F:
 
 ; Vratiti stari vektor prekida 0x2F
 _stari_2F:
-	cli
-	xor ax, ax
-	mov es, ax
-	mov ax, [old_int2F_seg]
-	mov [es:2Fh*4+2], ax
-	mov dx, [old_int2F_off]
-	mov [es:2Fh*4], dx
-	sti
+		pusha
+		cli
+		xor ax, ax
+		mov es, ax
+		
+		mov ax, [es:2Fh*4+2]
+		mov ds, ax 
+
+		mov ax, [old_int2F_seg]
+		mov [es:2Fh*4+2], ax
+		mov dx, [old_int2F_off]
+		mov [es:2Fh*4], dx
+		sti
+		popa
 	ret
 
 
@@ -85,14 +97,20 @@ _novi_1C:
 
 ; Vratiti stari vektor prekida 0x1C
 _stari_1C:
-	cli
-	xor ax, ax
-	mov es, ax
-	mov ax, [old_int1C_seg]
-	mov [es:1Ch*4+2], ax
-	mov dx, [old_int1C_off]
-	mov [es:1Ch*4], dx
-	sti
+		pusha
+		cli
+		xor ax, ax
+		mov es, ax
+		
+		mov ax, [es:1Ch*4+2]
+		mov ds, ax 
+
+		mov ax, [old_int1C_seg]
+		mov [es:1Ch*4+2], ax
+		mov dx, [old_int1C_off]
+		mov [es:1Ch*4], dx
+		sti
+		popa
 	ret
 
 segment .data

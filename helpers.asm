@@ -45,7 +45,7 @@ _green_dot:
 		mov bx, 3990
 		mov [es:bx], byte 0FEh
 		inc bx
-		mov [es:bx], byte 1
+		mov [es:bx], byte 2
 		popa
 	ret
 

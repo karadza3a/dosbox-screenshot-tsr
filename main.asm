@@ -5,7 +5,7 @@ lf equ 0Dh
 
 KBD equ 60h
 F1_SCAN equ 3Bh
-; F1_SCAN equ 01h
+F2_SCAN equ 3Ch
 
 segment .code
 
@@ -68,6 +68,11 @@ main:
 .stop_tsr:
 	mov word [_print.string], text_stopping
 	call	_print
+
+	call _stari_2F
+	call _stari_09
+	call _stari_1C
+
 	ret
 
 .start_tsr:

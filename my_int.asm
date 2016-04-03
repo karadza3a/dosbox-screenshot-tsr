@@ -70,37 +70,24 @@ _install_tsr:
 ; handler for the code we've been developing:
 
 _myint_2F:
-		push bx
-		mov bx, cs
-		mov ds, bx
-		pop bx
 
-		cmp     ah, [FuncID]   ;Is this call for us?
+		cmp     ah, [cs:FuncID]   ;Is this call for us?
 		je      .ItsUs
 
 		; jump to old int
-		push word [old_int2F_seg]
-		push word [old_int2F_off]
-		retf
+		push word [cs:old_int2F_seg]
+		push word [cs:old_int2F_off]
+	retf
 
 	; Now decode the function value in AL:
 
 	.ItsUs:
 		cmp     al, 0           ;Verify presence call?
 		je     .verify
-		cmp     al, 1          ;remove call?
-		je     .remove
-	iret
 
 	.verify:
 		mov     al, 0FFh        ;Return "present" value in AL.
 		mov 	di, uid
-	iret                    ;Return to caller.
-
-	.remove:
-		
-		;remove
-
 	iret                    ;Return to caller.
 
 _myint_1C:
@@ -121,11 +108,22 @@ _myint_1C:
 
 		; succesful
 		mov byte [should_print], 0
+
+		cmp byte [status_mode], 1
+		jne .izlaz
+
+		call _green_dot
+
 		jmp .izlaz
 
 	.izlaz:
-		popa  	
-	iret
+		popa  
+		push word [old_int1C_seg]
+		push word [old_int1C_off]
+	retf
+		;retf (return far) ce da skoci na stari handler za 09h
+		;nema potrebe da mi radimo iret, posto ce to stari hendler da ucini za nas
+	;iret
 
 _myint_09:
 		pusha
@@ -136,7 +134,12 @@ _myint_09:
 		in al, KBD				;citamo scan code
 		cmp al, F1_SCAN				;ako je pritisnuto F1
 		je .f1
+		cmp al, F2_SCAN				;ako je pritisnuto F2
+		je .f2
 		jmp .izlaz					;u suprotnom, idi na kraj
+	.f2:
+		xor byte [status_mode], 1
+		jmp .izlaz
 	.f1:
 		mov byte [should_print], 1
 		mov bx, 0B800h
@@ -182,6 +185,7 @@ segment .data
 FuncID db 0
 uid db "screenshot.karadza3a.com", cr, lf, 0
 should_print db 0
+status_mode db 0
 screen_cap times 2060 db 0
 
 %include "prekidi.asm"

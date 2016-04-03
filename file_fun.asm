@@ -28,8 +28,6 @@ _print_to_file:
 
 		jc .kraj
 
-		call _green_dot
-
 	;http://stanislavs.org/helppc/int_21-3d.html
 		mov ah, 03Ch        ; the open/create-a-file function
 		mov cx, 000h        ; file attribute - normal file
@@ -63,7 +61,6 @@ _print_to_file:
 		pop ax
 		call _ax2hex
 	.kraj:
-
 		popa
 	ret
 
