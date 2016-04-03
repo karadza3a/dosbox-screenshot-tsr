@@ -9,7 +9,7 @@ F1_SCAN equ 3Bh
 
 segment .code
 
-main:   
+main:
 	cld
 	mov	cx, 0080h	; Maksimalni broj izvrsavanja instrukcije sa prefiksom REPx
 	mov	di, 81h		; Pocetak komandne linije u PSP.

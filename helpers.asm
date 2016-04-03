@@ -36,8 +36,57 @@ _print_char:
 		pop  ax
 	ret          
 
+; Zelena tacka desno
+; -----------------------------------------------
+_green_dot:
+		pusha
+		mov bx, 0B800h			;pripremamo se za upis u video memoriju
+		mov es, bx
+		mov bx, 3990
+		mov [es:bx], byte 0FEh
+		inc bx
+		mov [es:bx], byte 1
+		popa
+	ret
+
+; ispisuje ax kao hex
+; -----------------------------------------------
+_ax2hex:
+		pusha
+		
+		mov bx, ax
+		mov cx, 4
+		mov dx, 0F000h
+	.petlja:
+		and ax, dx
+
+		push cx
+		push ax
+		
+		mov ax, 4
+		sub cl, 1
+		mul cl
+		mov cl, al
+		pop ax
+
+		shr ax, cl
+		pop cx
+
+		mov si, hex_chr
+		add si, ax
+		mov al, [si]
 
 
+		call _print_char
+
+		shr dx, 4
+		mov ax, bx
+		loop .petlja
+
+		popa	
+	ret
+
+; --------------------------------------
 ; Poredi dva stringa
 ;-------------------------------------
 ; params:
@@ -101,3 +150,4 @@ _strcmp:
 segment .data
 .str1 dw 0
 .str2 dw 0
+hex_chr db "0123456789ABCDEF"

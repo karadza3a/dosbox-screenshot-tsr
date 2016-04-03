@@ -108,24 +108,19 @@ _myint_1C:
 		mov bx, cs
 		mov ds, bx
 
-		cmp byte [cs:should_print], 1
+		cmp byte [should_print], 1
 		jne .izlaz
 
+	.write:
+		mov bx, [filename_addr]
+		mov word [_print_to_file.filename_addr], bx
+		mov word [_print_to_file.msg_len], 2050
+		mov word [_print_to_file.msg_addr], screen_cap
+		call _print_to_file
+		jc .izlaz
+
+		; succesful
 		mov byte [should_print], 0
-		mov bx, 0B800h			;pripremamo se za citanje iz video memorije
-		mov es, bx
-
-		mov cx, 2000
-		mov bx, 460
-		mov di, screen_cap
-	.copy:
-		mov al, [di]
-		inc al
-		mov [es:bx], al
-		inc di
-		add bx, 2
-		loop .copy
-
 		jmp .izlaz
 
 	.izlaz:
@@ -140,21 +135,34 @@ _myint_09:
 	; Obrada tastaturnog prekida 
 		in al, KBD				;citamo scan code
 		cmp al, F1_SCAN				;ako je pritisnuto F1
-		je .f1						;ispisi 1
+		je .f1
 		jmp .izlaz					;u suprotnom, idi na kraj
 	.f1:
-		mov byte [cs:should_print], 1
-		mov bx, 0B800h			;pripremamo se za citanje iz video memorije
+		mov byte [should_print], 1
+		mov bx, 0B800h
 		mov es, bx
 
 		mov cx, 2000
-		mov bx, 460
+		mov dx, 80 ;new line counter
+		mov bx, 0
 		mov di, screen_cap
 	.copy:
 		mov al, [es:bx]
 		mov [di], al
 		inc di
 		add bx, 2
+
+		dec dx
+		or dx, dx
+		jnz .copy_bottom
+
+		mov dx, 80
+		mov byte [di], cr
+		inc di
+		mov byte [di], lf
+		inc di
+
+	.copy_bottom:
 		loop .copy
 
 		jmp .izlaz
@@ -162,8 +170,8 @@ _myint_09:
 	.izlaz:
 		popa
 		
-		push word [cs:old_int09_seg]
-		push word [cs:old_int09_off]
+		push word [old_int09_seg]
+		push word [old_int09_off]
 	retf
 		;retf (return far) ce da skoci na stari handler za 09h
 		;nema potrebe da mi radimo iret, posto ce to stari hendler da ucini za nas
@@ -174,8 +182,7 @@ segment .data
 FuncID db 0
 uid db "screenshot.karadza3a.com", cr, lf, 0
 should_print db 0
-screen_cap times 2000 db 0
-db 0
+screen_cap times 2060 db 0
 
 %include "prekidi.asm"
 
